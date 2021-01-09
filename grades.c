@@ -49,6 +49,9 @@ int courses_clone(void *element, void **output) {
   struct courses *old_courses = (struct courses *) element;
   struct courses
       *new_courses = (struct courses *) malloc(sizeof(struct courses));
+  if (new_courses == NULL) {
+    return 1;
+  }
   new_courses->grade = old_courses->grade;
   new_courses->course_name =
       (char *) malloc(strlen(old_courses->course_name) + 1);
@@ -89,6 +92,9 @@ int student_clone(void *element, void **output) {
   struct student *old_student = (struct student *) element;
   struct student
       *new_student = (struct student *) malloc(sizeof(struct student));
+  if (new_student == NULL) {
+    return 1;
+  }
   new_student->id = old_student->id;
   new_student->student_name =
       (char *) malloc(strlen(old_student->student_name) + 1);
@@ -288,6 +294,7 @@ int grades_add_grade(struct grades *grades,
   void *void_new_course = (void *) (&new_course);
   if (list_push_back(student_to_add_grade->courses_list, void_new_course)
       != 0) {
+    free(new_course.course_name);
     return 1;
   }
   free(new_course.course_name);
@@ -305,6 +312,9 @@ float grades_calc_avg(struct grades *grades, int id, char **out) {
     return -1;
   }
   char *ps_name = (char *) malloc(strlen(student_to_avg->student_name) + 1);
+  if (ps_name == NULL) {
+    return -1;
+  }
   strcpy(ps_name, student_to_avg->student_name);
   *out = ps_name;
   pnode_t avg_courses = list_begin(student_to_avg->courses_list);
