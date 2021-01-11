@@ -104,6 +104,11 @@ int student_clone(void *element, void **output) {
   }
   strcpy(new_student->student_name, old_student->student_name);
   new_student->courses_list = list_init(courses_clone, courses_destroy);
+  if (new_student->courses_list == NULL) {
+    free(new_student->student_name);
+    free(new_student);
+    return 1;
+  }
   pnode_t iterator = list_begin(old_student->courses_list);
   while (iterator != NULL) {
     pnode_t it_last_grade_new_student = list_end(new_student->courses_list);
@@ -154,6 +159,9 @@ struct student *list_search_id(struct grades *grades, int check_id) {
     return NULL;
   }
   pnode_t iterator = list_begin(grades->students);
+  if (iterator == NULL) {
+    return NULL;
+  }
   while (iterator != NULL) {
     struct student *current_student = (struct student *) list_get(iterator);
     if (current_student == NULL) {
@@ -204,7 +212,7 @@ int print_courses(struct student *print_student_course) {
   }
   pnode_t iterator = list_begin(print_student_course->courses_list);
   struct courses *course_to_print;
-  while (iterator) {
+  while (iterator != NULL) {
     course_to_print = (struct courses *) list_get(iterator);
     if (course_to_print == NULL) {
       return 1;
@@ -230,6 +238,9 @@ struct grades *grades_init() {
     return NULL;
   }
   new_grades->students = list_init(student_clone, student_destroy);
+  if (new_grades->students == NULL) {
+    return NULL;
+  }
   return new_grades;
 }
 
@@ -303,7 +314,6 @@ int grades_add_grade(struct grades *grades,
 
 float grades_calc_avg(struct grades *grades, int id, char **out) {
   if ((grades == NULL) || (out == NULL)) {
-    *out = NULL;
     return -1;
   }
   struct student *student_to_avg = list_search_id(grades, id);
@@ -313,6 +323,7 @@ float grades_calc_avg(struct grades *grades, int id, char **out) {
   }
   char *ps_name = (char *) malloc(strlen(student_to_avg->student_name) + 1);
   if (ps_name == NULL) {
+    *out = NULL;
     return -1;
   }
   strcpy(ps_name, student_to_avg->student_name);
